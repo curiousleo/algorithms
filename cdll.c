@@ -3,10 +3,10 @@
 
 #include "cdll.h"
 
-static const int BYTES = sizeof(cdll);
+static const int CDLL_SIZE = sizeof(cdll);
 
 cdll *cdll_make(void) {
-  cdll *l = (cdll *) malloc(BYTES);
+  cdll *l = (cdll *) malloc(CDLL_SIZE);
   l->next = NULL;
   return l;
 }
