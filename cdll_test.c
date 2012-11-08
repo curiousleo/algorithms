@@ -11,7 +11,7 @@ bool check_pointers (cdll *l) {
 
   for (ltmp = l->prev; l != ltmp; l = l->next) {
     if (!(l->prev->next == l && l->next->prev == l))
-      return true;
+      return false;
   }
   return l->prev->next == l && l->next->prev == l;
 }
