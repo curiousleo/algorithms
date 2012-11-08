@@ -63,6 +63,7 @@ void cdll_free(cdll *l) {
   l->next->prev = l->prev;
   /* free(l->item->payload); */
   free(l);
+  l = NULL;
 }
 
 void cdll_free_all(cdll *l) {
