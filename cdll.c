@@ -20,10 +20,10 @@ void cdll_insert(cdll *l, int i) {
     cdll *newl = cdll_make();
     newl->item = i;
 
-    l->next->prev = newl;
-    newl->next = l->next;
-    l->next = newl;
-    newl->prev = l;
+    l->prev->next = newl;
+    newl->prev = l->prev;
+    l->prev = newl;
+    newl->next = l;
   }
 }
 
