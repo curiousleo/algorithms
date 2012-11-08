@@ -26,6 +26,7 @@ void cdll_todot (cdll *l, FILE *fp) {
       "\tnode [shape = box];\n" \
       "\t%d [style = filled];\n", l->item);
   for (ltmp = l->prev; l != ltmp; l = l->next) {
+    assert(l->next->prev == l);
     fprintf(fp, "\t%d -- %d;\n", l->item, l->next->item);
   }
   fprintf(fp, "\t%d -- %d;\n", ltmp->item, ltmp->next->item);
