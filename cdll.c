@@ -1,6 +1,5 @@
 #include <assert.h>   /* assert */
 #include <stdlib.h>   /* malloc, free */
-#include <string.h>   /* memset */
 
 #include "cdll.h"
 
@@ -8,7 +7,7 @@ static const int BYTES = sizeof(cdll);
 
 cdll *cdll_make(void) {
   cdll *l = (cdll *) malloc(BYTES);
-  memset(l, 0, BYTES);
+  l->next = NULL;
   return l;
 }
 
