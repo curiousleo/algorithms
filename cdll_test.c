@@ -5,31 +5,30 @@
 #include "cdll.h"
 
 bool check_pointers (cdll *l) {
-  if (CDLLEMPTY(l)) {
-    return true;
-  } else {
-    cdll *ltmp;
-    for (ltmp = l->prev; l != ltmp; l = l->next) {
-      if (!(l->prev->next == l && l->next->prev == l))
-        return true;
-    }
-    return l->prev->next == l && l->next->prev == l;
+  cdll *ltmp;
+
+  if (CDLLEMPTY(l)) return true;
+
+  for (ltmp = l->prev; l != ltmp; l = l->next) {
+    if (!(l->prev->next == l && l->next->prev == l))
+      return true;
   }
+  return l->prev->next == l && l->next->prev == l;
 }
 
 void cdll_todot (cdll *l, FILE *fp) {
   cdll *ltmp;
-  fprintf(fp, "digraph cdll {\n\tlayout = circo\n");
+
+  if (CDLLEMPTY(l)) return;
+
+  fprintf(fp, "graph cdll {\n" \
+      "\tlayout = circo\n" \
+      "\tnode [shape = box];\n" \
+      "\t%d [style = filled];\n", l->item);
   for (ltmp = l->prev; l != ltmp; l = l->next) {
-    fprintf(fp, "\t%d -> %d [label = \"n\"];\n",
-        l->item, l->next->item);
-    fprintf(fp, "\t%d -> %d [label = \"p\"];\n",
-        l->item, l->prev->item);
+    fprintf(fp, "\t%d -- %d;\n", l->item, l->next->item);
   }
-  fprintf(fp, "\t%d -> %d [label = \"n\"];\n",
-      ltmp->item, ltmp->next->item);
-  fprintf(fp, "\t%d -> %d [label = \"p\"];\n",
-      ltmp->item, ltmp->prev->item);
+  fprintf(fp, "\t%d -- %d;\n", ltmp->item, ltmp->next->item);
   fprintf(fp, "}\n");
 }
 
@@ -41,8 +40,11 @@ int main () {
   cdll_insert(l, 3);
   cdll_insert(l, 4);
   cdll_insert(l, 5);
-  cdll_todot(l, stdout);
-  cdll_delete(l, 3);
+  cdll_insert(l, 6);
+  cdll_insert(l, 7);
+  cdll_insert(l, 8);
+  cdll_insert(l, 9);
+  cdll_insert(l, 10);
   cdll_todot(l, stdout);
   assert(check_pointers(l));
   cdll_free_all(l);
