@@ -1,3 +1,13 @@
+/*
+ * cdll.c
+ *
+ * A simplistic circular doubly-linked list implementation.
+ *
+ * Leonhard Markert, 2012
+ * Licensed under Creative Commons Attribution (cc-by).
+ *
+ */
+
 #include <assert.h>   /* assert */
 #include <stdlib.h>   /* malloc, free */
 

@@ -1,3 +1,13 @@
+/*
+ * cdll_test.c
+ *
+ * A simplistic circular doubly-linked list implementation: Tests
+ *
+ * Leonhard Markert, 2012
+ * Licensed under Creative Commons Attribution (cc-by).
+ *
+ */
+
 #include <assert.h>   /* assert */
 #include <stdio.h>    /* printf */
 #include <stdbool.h>  /* bool type */

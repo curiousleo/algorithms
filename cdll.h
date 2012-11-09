@@ -1,3 +1,13 @@
+/*
+ * cdll.h
+ *
+ * A simplistic circular doubly-linked list implementation: Header
+ *
+ * Leonhard Markert, 2012
+ * Licensed under Creative Commons Attribution (cc-by).
+ *
+ */
+
 #ifndef CDLL_H
 #define CDLL_H
 
