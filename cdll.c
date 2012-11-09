@@ -5,19 +5,19 @@
 
 static const int CDLL_SIZE = sizeof(cdll);
 
-cdll *cdll_make(void) {
+cdll *cdll_init(void) {
   cdll *l = (cdll *) malloc(CDLL_SIZE);
-  l->next = NULL;
+  CDLL_SETEMPTY(l);
   return l;
 }
 
 /* void cdll_insert(cdll *l, item i); */
 void cdll_insert(cdll *l, int i) {
-  if (CDLLEMPTY(l)) {
+  if (CDLL_ISEMPTY(l)) {
     l->item = i;
     l->next = l->prev = l;
   } else {
-    cdll *newl = cdll_make();
+    cdll *newl = cdll_init();
     newl->item = i;
 
     l->prev->next = newl;
@@ -29,10 +29,14 @@ void cdll_insert(cdll *l, int i) {
 
 /* void cdll_delete(cdll *l, item i); */
 void cdll_delete(cdll *l, int i) {
+  assert(!CDLL_ISEMPTY(l));
+  if (CDLL_ISSINGL(l)) {
+    CDLL_SETEMPTY(l);
+    return;
+  }
 #ifndef NDEBUG
   cdll *ltmp = l;
-#endif /* NDEBUG */
-  assert(!CDLLEMPTY(l));
+#endif /* DEBUG */
   while (l->item != i) {
     /* linear search for item */
     l = l->next;
@@ -43,9 +47,9 @@ void cdll_delete(cdll *l, int i) {
 
 void cdll_merge(cdll *l, cdll *l2) {
   /* TODO: check postcondition "l2 is empty" */
-  if (CDLLEMPTY(l)) {
+  if (CDLL_ISEMPTY(l)) {
     l = l2;
-  } else if (CDLLEMPTY(l2)) {
+  } else if (CDLL_ISEMPTY(l2)) {
     return;
   } else {
     /* need one temporary pointer for crossover */
@@ -56,6 +60,14 @@ void cdll_merge(cdll *l, cdll *l2) {
     l->prev = l2->prev;
     l2->prev = lprev;
   }
+#ifdef MERGE_STRICT
+  cdll *l2cp = cdll_init();
+  memcpy(l2cp, l, CDLL_SIZE);
+  l->prev->next = l2cp;
+  l->next->prev = l2cp;
+  /* cdll_free(l); */
+  CDLL_SETEMPTY(l);
+#endif /* MERGE_STRICT */
 }
 
 void cdll_free(cdll *l) {
@@ -67,11 +79,11 @@ void cdll_free(cdll *l) {
 }
 
 void cdll_free_all(cdll *l) {
-  if (CDLLEMPTY(l)) {
+  if (CDLL_ISEMPTY(l)) {
     free(l);
   } else {
     cdll *lnext;
-    while (!(CDLLSINGL(l))) {
+    while (!(CDLL_ISSINGL(l))) {
       lnext = l->next;
       cdll_free(l);
       l = lnext;

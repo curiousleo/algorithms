@@ -23,7 +23,6 @@ void cdll_todot (cdll *l, FILE *fp) {
 
   fprintf(fp, "graph cdll {\n" \
       "\tlayout = circo\n" \
-      "\tnode [shape = box];\n" \
       "\t%d [style = filled];\n", l->item);
   for (ltmp = l->prev; l != ltmp; l = l->next) {
     assert(l->next->prev == l);
@@ -34,8 +33,9 @@ void cdll_todot (cdll *l, FILE *fp) {
 }
 
 int main () {
-  cdll *l = cdll_make();
+  cdll *l = cdll_init();
   assert(check_pointers(l));
+
   cdll_insert(l, 1);
   cdll_insert(l, 2);
   cdll_insert(l, 3);
@@ -46,7 +46,23 @@ int main () {
   cdll_insert(l, 8);
   cdll_insert(l, 9);
   cdll_insert(l, 10);
+
+  cdll_delete(l, 6);
+  cdll_delete(l, 8);
+  cdll_delete(l, 1);
+  cdll_delete(l, 2);
+  cdll_delete(l, 3);
+  cdll_delete(l, 5);
+  cdll_delete(l, 4);
+  cdll_delete(l, 10);
+  cdll_delete(l, 7);
+  cdll_delete(l, 9);
+
+  /*
+  cdll_insert(l, 4);
+
   cdll_todot(l, stdout);
+  */
   assert(check_pointers(l));
   cdll_free_all(l);
   return 0;

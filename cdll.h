@@ -17,9 +17,9 @@ struct cdll_item {
 } item;
 */
 
-#define CDLLEMPTY(l)  ((cdll *)((l)->next) == (cdll *)NULL) /* l empty? */
-/* l singleton? */
-#define CDLLSINGL(l)  ((cdll *)((l)->next) == (cdll *)(l))
+#define CDLL_SETEMPTY(l) ((cdll *)((l)->next) =  (cdll *)NULL)
+#define CDLL_ISEMPTY(l)  ((cdll *)((l)->next) == (cdll *)NULL)
+#define CDLL_ISSINGL(l)  ((cdll *)((l)->next) == (cdll *)(l))
 
 cdll *cdll_make(void);
 /* void cdll_insert(cdll *l, cdll_item i); */
