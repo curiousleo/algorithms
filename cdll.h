@@ -27,16 +27,17 @@ struct cdll_item {
 } item;
 */
 
-#define CDLL_SETEMPTY(l) ((cdll *)((l)->next) =  (cdll *)NULL)
-#define CDLL_ISEMPTY(l)  ((cdll *)((l)->next) == (cdll *)NULL)
-#define CDLL_ISSINGL(l)  ((cdll *)((l)->next) == (cdll *)(l))
+#define CDLL_SETEMPTY(l) ((l)->next =  NULL)
+#define CDLL_ISEMPTY(l)  ((l) == NULL || (l)->next == NULL)
+#define CDLL_ISSINGL(l)  ((l)->next == (l))
 
-cdll *cdll_make(void);
+cdll *cdll_init(void);
 /* void cdll_insert(cdll *l, cdll_item i); */
 void cdll_insert(cdll *l, int i);
 /* void cdll_delete(cdll *l, cdll_item i); */
-void cdll_delete(cdll *l, int i);
-void cdll_merge(cdll *l, cdll *l2);
+cdll *cdll_delete(cdll *l, int i);
+void cdll_merge(cdll *l, cdll **l2);
+
 void cdll_free(cdll *l);
 void cdll_free_all(cdll *l);
 

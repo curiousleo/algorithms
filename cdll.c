@@ -10,6 +10,7 @@
 
 #include <assert.h>   /* assert */
 #include <stdlib.h>   /* malloc, free */
+#include <string.h>   /* memcpy */
 
 #include "cdll.h"
 
@@ -38,24 +39,28 @@ void cdll_insert(cdll *l, int i) {
 }
 
 /* void cdll_delete(cdll *l, item i); */
-void cdll_delete(cdll *l, int i) {
-  assert(!CDLL_ISEMPTY(l));
-  if (CDLL_ISSINGL(l)) {
-    CDLL_SETEMPTY(l);
-    return;
-  }
+cdll *cdll_delete(cdll *l, int i) {
+  cdll *lnext;
 #ifndef NDEBUG
   cdll *ltmp = l;
 #endif /* DEBUG */
+  assert(!CDLL_ISEMPTY(l));
+  if (CDLL_ISSINGL(l)) {
+    CDLL_SETEMPTY(l);
+    return l;
+  }
   while (l->item != i) {
     /* linear search for item */
     l = l->next;
     assert(l != ltmp);
   }
+  lnext = l->next;
   cdll_free(l);
+  return lnext;
 }
 
-void cdll_merge(cdll *l, cdll *l2) {
+void cdll_merge(cdll *l, cdll **l2ptr) {
+  cdll *l2 = *l2ptr;
   if (CDLL_ISEMPTY(l)) {
     l = l2;
   } else if (CDLL_ISEMPTY(l2)) {
@@ -72,13 +77,12 @@ void cdll_merge(cdll *l, cdll *l2) {
 #ifndef RELAXED_MERGE
   /* this is a bit unneccessary, but the postcondition on merge is that
    * the cdll *l2* that is merged into the "our" cdll *l1* has to be
-   * empty, so we need to copy it, make all pointers to point to the
-   * copy instead of the original, and set *l2* to be empty */
-  cdll *l2cp = cdll_init();
-  memcpy(l2cp, l, CDLL_SIZE);
-  l->prev->next = l2cp;
-  l->next->prev = l2cp;
-  CDLL_SETEMPTY(l);
+   * empty, so we need to copy its item, make all pointers to point to
+   * the copy instead of the original, and set *l2* to be empty */
+  // TODO: What if l == l2?
+  cdll_insert(l, l2->item);
+  cdll_free(l2);
+  *l2ptr = NULL;
 #endif /* RELAXED_MERGE */
 }
 
@@ -87,7 +91,6 @@ void cdll_free(cdll *l) {
   l->next->prev = l->prev;
   /* free(l->item->payload); */
   free(l);
-  l = NULL;
 }
 
 void cdll_free_all(cdll *l) {

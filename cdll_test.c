@@ -9,15 +9,20 @@
  */
 
 #include <assert.h>   /* assert */
-#include <stdio.h>    /* printf */
 #include <stdbool.h>  /* bool type */
+#include <stdio.h>    /* printf */
+#include <stdlib.h>   /* exit */
+#include <string.h>   /* strings */
 
 #include "cdll.h"
 
 bool check_pointers (cdll *l) {
   cdll *ltmp;
 
-  if (CDLLEMPTY(l)) return true;
+  if (CDLL_ISEMPTY(l)) {
+    printf("Empty!\n");
+    return true;
+  }
 
   for (ltmp = l->prev; l != ltmp; l = l->next) {
     if (!(l->prev->next == l && l->next->prev == l))
@@ -29,50 +34,93 @@ bool check_pointers (cdll *l) {
 void cdll_todot (cdll *l, FILE *fp) {
   cdll *ltmp;
 
-  if (CDLLEMPTY(l)) return;
+  if (CDLL_ISEMPTY(l)) return;
 
   fprintf(fp, "graph cdll {\n" \
       "\tlayout = circo\n" \
       "\t%d [style = filled];\n", l->item);
   for (ltmp = l->prev; l != ltmp; l = l->next) {
-    assert(l->next->prev == l);
+    /* assert(l->next->prev == l); */
     fprintf(fp, "\t%d -- %d;\n", l->item, l->next->item);
   }
   fprintf(fp, "\t%d -- %d;\n", ltmp->item, ltmp->next->item);
   fprintf(fp, "}\n");
 }
 
-int main () {
+void cdll_print (cdll *l) {
+  cdll *ltmp;
+  if (CDLL_ISEMPTY(l)) { printf("Empty.\n"); }
+  for (ltmp = l->prev; l != ltmp; l = l->next) {
+    printf("\t-- %d", l->item);
+  }
+  printf(" -- %d --\n", ltmp->item);
+}
+
+void update_loop (cdll *l, char *fname) {
+  FILE *fp;
+  char cmd = 'n';
+  int matched, val;
+
+  while (true) {
+    matched = scanf("%c %d", &cmd, &val);
+    if (matched == 2) {
+      switch(cmd) {
+        case 'a': cdll_insert(l, val);
+                  break;
+        case 'd': l = cdll_delete(l, val);
+      }
+      cdll_print(l);
+      fp = fopen(fname, "w");
+      cdll_todot(l, fp);
+      fclose(fp);
+      if (!check_pointers(l)) {
+        exit(1);
+      }
+    }
+  }
+}
+
+int main (int argc, char **argv) {
   cdll *l = cdll_init();
-  assert(check_pointers(l));
+  cdll *l2 = cdll_init();
+  char *fname = "out.dot\0";
+  FILE *fp;
+
+  if (argc > 1) {
+    fname = argv[1];
+    update_loop(l, fname);
+    return 0;
+  }
 
   cdll_insert(l, 1);
   cdll_insert(l, 2);
   cdll_insert(l, 3);
   cdll_insert(l, 4);
   cdll_insert(l, 5);
-  cdll_insert(l, 6);
-  cdll_insert(l, 7);
-  cdll_insert(l, 8);
-  cdll_insert(l, 9);
-  cdll_insert(l, 10);
 
-  cdll_delete(l, 6);
-  cdll_delete(l, 8);
-  cdll_delete(l, 1);
-  cdll_delete(l, 2);
-  cdll_delete(l, 3);
-  cdll_delete(l, 5);
-  cdll_delete(l, 4);
-  cdll_delete(l, 10);
-  cdll_delete(l, 7);
-  cdll_delete(l, 9);
+  cdll_insert(l2, 6);
+  cdll_insert(l2, 7);
+  cdll_insert(l2, 8);
+  cdll_insert(l2, 9);
+  cdll_insert(l2, 10);
 
-  /*
-  cdll_insert(l, 4);
+  fp = fopen(fname, "w");
+  cdll_todot(l, fp);
+  fclose(fp);
+  getchar();
 
-  cdll_todot(l, stdout);
-  */
+  fp = fopen(fname, "w");
+  cdll_todot(l2, fp);
+  fclose(fp);
+  getchar();
+
+  cdll_merge(l, &l2);
+
+  fp = fopen(fname, "w");
+  cdll_todot(l, fp);
+  fclose(fp);
+
+  assert(CDLL_ISEMPTY(l2));
   assert(check_pointers(l));
   cdll_free_all(l);
   return 0;
