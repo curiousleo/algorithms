@@ -56,7 +56,6 @@ void cdll_delete(cdll *l, int i) {
 }
 
 void cdll_merge(cdll *l, cdll *l2) {
-  /* TODO: check postcondition "l2 is empty" */
   if (CDLL_ISEMPTY(l)) {
     l = l2;
   } else if (CDLL_ISEMPTY(l2)) {
@@ -70,14 +69,17 @@ void cdll_merge(cdll *l, cdll *l2) {
     l->prev = l2->prev;
     l2->prev = lprev;
   }
-#ifdef MERGE_STRICT
+#ifndef RELAXED_MERGE
+  /* this is a bit unneccessary, but the postcondition on merge is that
+   * the cdll *l2* that is merged into the "our" cdll *l1* has to be
+   * empty, so we need to copy it, make all pointers to point to the
+   * copy instead of the original, and set *l2* to be empty */
   cdll *l2cp = cdll_init();
   memcpy(l2cp, l, CDLL_SIZE);
   l->prev->next = l2cp;
   l->next->prev = l2cp;
-  /* cdll_free(l); */
   CDLL_SETEMPTY(l);
-#endif /* MERGE_STRICT */
+#endif /* RELAXED_MERGE */
 }
 
 void cdll_free(cdll *l) {
