@@ -114,13 +114,14 @@ int main (int argc, char **argv) {
   fclose(fp);
   getchar();
 
-  cdll_merge(l, &l2);
+  cdll_merge(l, l2);
+  assert(CDLL_ISEMPTY(l2));
+  cdll_free(l2);
 
   fp = fopen(fname, "w");
   cdll_todot(l, fp);
   fclose(fp);
 
-  assert(CDLL_ISEMPTY(l2));
   assert(check_pointers(l));
   cdll_free_all(l);
   return 0;

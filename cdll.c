@@ -10,7 +10,6 @@
 
 #include <assert.h>   /* assert */
 #include <stdlib.h>   /* malloc, free */
-#include <string.h>   /* memcpy */
 
 #include "cdll.h"
 
@@ -45,7 +44,7 @@ cdll *cdll_delete(cdll *l, int i) {
   cdll *ltmp = l;
 #endif /* DEBUG */
   assert(!CDLL_ISEMPTY(l));
-  if (CDLL_ISSINGL(l)) {
+  if (CDLL_ISSINGLT(l)) {
     CDLL_SETEMPTY(l);
     return l;
   }
@@ -59,36 +58,41 @@ cdll *cdll_delete(cdll *l, int i) {
   return lnext;
 }
 
-void cdll_merge(cdll *l, cdll **l2ptr) {
-  cdll *l2 = *l2ptr;
-  if (CDLL_ISEMPTY(l)) {
-    /* copy contents (pointers and all) of *l2* to *l* */
+void cdll_merge(cdll *l, cdll *l2) {
+  cdll *l2copy;
+  /* three cases: *l2* is empty / *l* is empty / neither is empty */
+  if (CDLL_ISEMPTY(l2)) {
+    /* case 1: *l2* is empty - do nothing. */
+    return;
+  } else if (CDLL_ISEMPTY(l)) {
+    /* case 2; *l* is empty - copy contents of *l2* to *l*, update
+     * pointers, set *l2* to empty */
     *l = *l2;
-  } else if (CDLL_ISEMPTY(l2)) {
+    l->prev->next = l;
+    l->next->prev = l;
+    CDLL_SETEMPTY(l2);
     return;
   } else {
-    /* need one temporary pointer for crossover */
-    cdll *lprev = l->prev;
-
-    l->prev->next = l2;
-    l2->prev->next = l;
-    l->prev = l2->prev;
-    l2->prev = lprev;
+    /* case 3: neither *l* nor *l2* is empty - splice *l2* into *l* */
+    l2copy = cdll_init();
+    *l2copy = *l2;
+    l2copy->next->prev = l2copy;
+    l2copy->prev->next = l;
+    l2copy->prev = l->prev;
+    l->prev->next = l2copy;
+    l->prev = l2->prev; /* useful to still have *l2* around here */
+    CDLL_SETEMPTY(l2);
+    return;
   }
-#ifndef RELAXED_MERGE
-  /* this is a bit unneccessary, but the postcondition on merge is that
-   * the cdll *l2* that is merged into the "our" cdll *l1* has to be
-   * empty, so we need to copy its item, make all pointers to point to
-   * the copy instead of the original, and set *l2* to be empty */
-  cdll_insert(l, l2->item);
-  cdll_free(l2);
-  *l2ptr = NULL;
-#endif /* RELAXED_MERGE */
 }
 
 void cdll_free(cdll *l) {
-  l->prev->next = l->next;
-  l->next->prev = l->prev;
+  if (!CDLL_ISEMPTY(l)) {
+    /* if *l* is empty, l->next is NULL so assignment to l->next->prev
+     * results in a segfault */
+    l->prev->next = l->next;
+    l->next->prev = l->prev;
+  }
   /* free(l->item->payload); */
   free(l);
 }
@@ -98,7 +102,7 @@ void cdll_free_all(cdll *l) {
     free(l);
   } else {
     cdll *lnext;
-    while (!(CDLL_ISSINGL(l))) {
+    while (!(CDLL_ISSINGLT(l))) {
       lnext = l->next;
       cdll_free(l);
       l = lnext;
