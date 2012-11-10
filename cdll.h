@@ -11,14 +11,14 @@
 #define CDLL_H
 
 struct cdll {
-	int		item;
-	struct cdll	*prev;
-	struct cdll	*next;
+        int                item;
+        struct cdll        *prev;
+        struct cdll        *next;
 };
 
-#define CDLL_SETEMPTY(l)	((l)->next =  NULL)
-#define CDLL_ISEMPTY(l)		((l)->next == NULL)
-#define CDLL_ISSINGLT(l)	((l)->next == (l))
+#define CDLL_SETEMPTY(l)   ((l)->next =  NULL)
+#define CDLL_ISEMPTY(l)    ((l)->next == NULL)
+#define CDLL_ISSINGLT(l)   ((l)->next == (l))
 
 struct cdll *cdll_init(void);
 void cdll_insert(struct cdll *l, int i);

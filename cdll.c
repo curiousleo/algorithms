@@ -7,8 +7,8 @@
  * Licensed under Creative Commons Attribution (cc-by).
  */
 
-#include <assert.h>	/* assert */
-#include <stdlib.h>	/* malloc, free */
+#include <assert.h>        /* assert */
+#include <stdlib.h>        /* malloc, free */
 
 #include "cdll.h"
 
@@ -19,9 +19,9 @@ static const int CDLL_SIZE = sizeof(struct cdll);
  */
 struct cdll *cdll_init(void)
 {
-	struct cdll *l = (struct cdll *) malloc(CDLL_SIZE);
-	CDLL_SETEMPTY(l);
-	return l;
+        struct cdll *l = (struct cdll *) malloc(CDLL_SIZE);
+        CDLL_SETEMPTY(l);
+        return l;
 }
 
 /*
@@ -29,18 +29,18 @@ struct cdll *cdll_init(void)
  */
 void cdll_insert(struct cdll *l, int i)
 {
-	if (CDLL_ISEMPTY(l)) {
-		l->item = i;
-		l->next = l->prev = l;
-	} else {
-		struct cdll *newl = cdll_init();
-		newl->item = i;
+        if (CDLL_ISEMPTY(l)) {
+                l->item = i;
+                l->next = l->prev = l;
+        } else {
+                struct cdll *newl = cdll_init();
+                newl->item = i;
 
-		l->prev->next = newl;
-		newl->prev = l->prev;
-		l->prev = newl;
-		newl->next = l;
-	}
+                l->prev->next = newl;
+                newl->prev = l->prev;
+                l->prev = newl;
+                newl->next = l;
+        }
 }
 
 /*
@@ -50,23 +50,23 @@ void cdll_insert(struct cdll *l, int i)
  */
 struct cdll *cdll_delete(struct cdll *l, int i)
 {
-	struct cdll *lnext;
+        struct cdll *lnext;
 #ifndef NDEBUG
-	struct cdll *ltmp = l;
+        struct cdll *ltmp = l;
 #endif /* DEBUG */
-	assert(!CDLL_ISEMPTY(l));
-	if (CDLL_ISSINGLT(l)) {
-		CDLL_SETEMPTY(l);
-		return l;
-	}
-	while (l->item != i) {
-		/* linear search for item */
-		l = l->next;
-		assert(l != ltmp);
-	}
-	lnext = l->next;
-	cdll_free(l);
-	return lnext;
+        assert(!CDLL_ISEMPTY(l));
+        if (CDLL_ISSINGLT(l)) {
+                CDLL_SETEMPTY(l);
+                return l;
+        }
+        while (l->item != i) {
+                /* linear search for item */
+                l = l->next;
+                assert(l != ltmp);
+        }
+        lnext = l->next;
+        cdll_free(l);
+        return lnext;
 }
 
 /*
@@ -76,36 +76,36 @@ struct cdll *cdll_delete(struct cdll *l, int i)
  * Note: The calling procedure must take care of freeing *l2* itself,
  * e.g. using cdll_free():
  *
- *	cdll_merge(l, l2);
- *	cdll_free(l2);
+ *        cdll_merge(l, l2);
+ *        cdll_free(l2);
  */
 void cdll_merge(struct cdll *l, struct cdll *l2)
 {
-	struct cdll *l2copy;
-	if (CDLL_ISEMPTY(l2)) {
-		/* case 1: *l2* is empty - do nothing. */
-		return;
-	} else if (CDLL_ISEMPTY(l)) {
-		/* case 2: *l* is empty - copy contents of *l2* to *l*,
-		 * update pointers, set *l2* to empty */
-		*l = *l2;
-		l->prev->next = l;
-		l->next->prev = l;
-		CDLL_SETEMPTY(l2);
-		return;
-	} else {
-		/* case 3: neither *l* nor *l2* is empty - splice *l2*
-		 * into *l* */
-		l2copy = cdll_init();
-		*l2copy = *l2;
-		l2copy->next->prev = l2copy;
-		l2copy->prev->next = l;
-		l2copy->prev = l->prev;
-		l->prev->next = l2copy;
-		l->prev = l2->prev;
-		CDLL_SETEMPTY(l2);
-		return;
-	}
+        struct cdll *l2copy;
+        if (CDLL_ISEMPTY(l2)) {
+                /* case 1: *l2* is empty - do nothing. */
+                return;
+        } else if (CDLL_ISEMPTY(l)) {
+                /* case 2: *l* is empty - copy contents of *l2* to *l*,
+                 * update pointers, set *l2* to empty */
+                *l = *l2;
+                l->prev->next = l;
+                l->next->prev = l;
+                CDLL_SETEMPTY(l2);
+                return;
+        } else {
+                /* case 3: neither *l* nor *l2* is empty - splice *l2*
+                 * into *l* */
+                l2copy = cdll_init();
+                *l2copy = *l2;
+                l2copy->next->prev = l2copy;
+                l2copy->prev->next = l;
+                l2copy->prev = l->prev;
+                l->prev->next = l2copy;
+                l->prev = l2->prev;
+                CDLL_SETEMPTY(l2);
+                return;
+        }
 }
 
 /*
@@ -117,14 +117,14 @@ void cdll_merge(struct cdll *l, struct cdll *l2)
  */
 void cdll_free(struct cdll *l)
 {
-	if (!CDLL_ISEMPTY(l)) {
-		/* if *l* is empty, l->next is NULL so assignment to
-		 * l->next->prev results in a segfault */
-		l->prev->next = l->next;
-		l->next->prev = l->prev;
-	}
-	/* free(l->item->payload); */
-	free(l);
+        if (!CDLL_ISEMPTY(l)) {
+                /* if *l* is empty, l->next is NULL so assignment to
+                 * l->next->prev results in a segfault */
+                l->prev->next = l->next;
+                l->next->prev = l->prev;
+        }
+        /* free(l->item->payload); */
+        free(l);
 }
 
 /*
@@ -135,15 +135,15 @@ void cdll_free(struct cdll *l)
  */
 void cdll_free_all(struct cdll *l)
 {
-	if (CDLL_ISEMPTY(l)) {
-		free(l);
-	} else {
-		struct cdll *lnext;
-		while (!(CDLL_ISSINGLT(l))) {
-			lnext = l->next;
-			cdll_free(l);
-			l = lnext;
-		}
-		cdll_free(l);
-	}
+        if (CDLL_ISEMPTY(l)) {
+                free(l);
+        } else {
+                struct cdll *lnext;
+                while (!(CDLL_ISSINGLT(l))) {
+                        lnext = l->next;
+                        cdll_free(l);
+                        l = lnext;
+                }
+                cdll_free(l);
+        }
 }

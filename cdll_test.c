@@ -7,11 +7,11 @@
  * Licensed under Creative Commons Attribution (cc-by).
  */
 
-#include <assert.h>	/* assert */
-#include <stdbool.h>	/* bool type */
-#include <stdio.h>		/* printf */
-#include <stdlib.h>	/* exit */
-#include <string.h>	/* strings */
+#include <assert.h>        /* assert */
+#include <stdbool.h>        /* bool type */
+#include <stdio.h>                /* printf */
+#include <stdlib.h>        /* exit */
+#include <string.h>        /* strings */
 
 #include "cdll.h"
 
@@ -19,21 +19,21 @@
 
 static bool check_pointers (struct cdll *l)
 {
-	struct cdll *ltmp;
+        struct cdll *ltmp;
 
-	if (CDLL_ISEMPTY(l)) return true;
+        if (CDLL_ISEMPTY(l)) return true;
 
-	for (ltmp = l->prev; l != ltmp; l = l->next) {
-		if (!(l->prev->next == l && l->next->prev == l))
-				return false;
-	}
-	return l->prev->next == l && l->next->prev == l;
+        for (ltmp = l->prev; l != ltmp; l = l->next) {
+                if (!(l->prev->next == l && l->next->prev == l))
+                        return false;
+        }
+        return l->prev->next == l && l->next->prev == l;
 }
 
 static void cdll_todot (struct cdll *l, FILE *fp)
 {
-	struct cdll *ltmp;
-	if (CDLL_ISEMPTY(l)) {
+        struct cdll *ltmp;
+        if (CDLL_ISEMPTY(l)) {
                 fprintf(fp, "graph cdll {\n" \
                                 "\tlayout = circo\n" \
                                 "\tempty [style = filled];\n" \
@@ -42,73 +42,73 @@ static void cdll_todot (struct cdll *l, FILE *fp)
                 return;
         }
 
-	fprintf(fp, "graph cdll {\n" \
+        fprintf(fp, "graph cdll {\n" \
                         "\tlayout = circo\n" \
                         "\t%d [style = filled];\n", l->item);
-	for (ltmp = l->prev; l != ltmp; l = l->next) {
-		/* assert(l->next->prev == l); */
-		fprintf(fp, "\t%d -- %d;\n", l->item, l->next->item);
-	}
-	fprintf(fp, "\t%d -- %d;\n", ltmp->item, ltmp->next->item);
-	fprintf(fp, "}\n");
+        for (ltmp = l->prev; l != ltmp; l = l->next) {
+                /* assert(l->next->prev == l); */
+                fprintf(fp, "\t%d -- %d;\n", l->item, l->next->item);
+        }
+        fprintf(fp, "\t%d -- %d;\n", ltmp->item, ltmp->next->item);
+        fprintf(fp, "}\n");
 }
 
 static void cdll_print (struct cdll *l)
 {
-	struct cdll *ltmp;
-	if (CDLL_ISEMPTY(l)) {
+        struct cdll *ltmp;
+        if (CDLL_ISEMPTY(l)) {
                 printf("\t[Empty]\n");
                 return;
         }
         printf("\t");
-	for (ltmp = l->prev; l != ltmp; l = l->next) {
-		printf("-- %d ", l->item);
-	}
-	printf("-- %d --\n", ltmp->item);
+        for (ltmp = l->prev; l != ltmp; l = l->next) {
+                printf("-- %d ", l->item);
+        }
+        printf("-- %d --\n", ltmp->item);
 }
 
 static void update_loop (struct cdll *l, char *fname)
 {
-	FILE *fp;
-	char cmd = 'n';
-	int matched, val;
+        FILE *fp;
+        char cmd = 'n';
+        int matched, val;
         printf("Interactive mode.\n" \
                         "Commands: i <value><enter> to insert <value>\n" \
                         "          d <value><enter> to delete <value>\n" \
                         "          <ctrl-c> to quit.\n");
 
-	while (true) {
-		matched = scanf("%c %d", &cmd, &val);
-		if (matched == 2) {
-			switch(cmd) {
-				case 'i': cdll_insert(l, val);
-					  break;
-				case 'd': l = cdll_delete(l, val);
-			}
-			cdll_print(l);
-			fp = fopen(fname, "w");
-			cdll_todot(l, fp);
-			fclose(fp);
-		}
-	}
+        while (true) {
+                matched = scanf("%c %d", &cmd, &val);
+                if (matched == 2) {
+                        switch(cmd) {
+                                case 'i': cdll_insert(l, val);
+                                          break;
+                                case 'd': l = cdll_delete(l, val);
+                        }
+                        cdll_print(l);
+                        fp = fopen(fname, "w");
+                        cdll_todot(l, fp);
+                        fclose(fp);
+                }
+        }
 }
 
 int main (int argc, char **argv)
 {
-	struct cdll *l = cdll_init();
-	struct cdll *l2 = cdll_init();
-	char *fname;
-	FILE *fp;
+        struct cdll *l = cdll_init();
+        struct cdll *l2 = cdll_init();
+        char *fname;
+        FILE *fp;
 
-	if (argc > 2) {
+        if (argc > 2) {
                 if (strcmp(argv[1], "-i") != 0) {
                         printf(USAGE);
                         return 1;
                 }
-		fname = argv[2];
-		update_loop(l, fname);
-		return 0;
-	} else if (argc > 1) {
+                fname = argv[2];
+                update_loop(l, fname);
+                return 0;
+        } else if (argc > 1) {
                 fname = argv[1];
 
                 cdll_insert(l, 1);
