@@ -11,9 +11,9 @@
 #define CDLL_H
 
 struct cdll {
-	int item;
-	struct cdll *prev;
-	struct cdll *next;
+	int		item;
+	struct cdll	*prev;
+	struct cdll	*next;
 };
 
 #define CDLL_SETEMPTY(l)	((l)->next =  NULL)
