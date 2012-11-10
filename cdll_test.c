@@ -7,17 +7,20 @@
  * Licensed under Creative Commons Attribution (cc-by).
  */
 
-#include <assert.h>        /* assert */
+#include <assert.h>         /* assert */
 #include <stdbool.h>        /* bool type */
-#include <stdio.h>                /* printf */
-#include <stdlib.h>        /* exit */
-#include <string.h>        /* strings */
+#include <stdio.h>          /* printf */
+#include <stdlib.h>         /* exit */
+#include <string.h>         /* strings */
 
 #include "cdll.h"
 
-#define USAGE           "cdll_test [-i] <dotfile.dot>\n"
+#define USAGE               "cdll_test [-i] <dotfile.dot>\n"
 
-static bool check_pointers (struct cdll *l)
+/*
+ * Check the *prev* and *next* pointers in cdll *l* for consistency.
+ */
+static bool check_pointers(struct cdll *l)
 {
         struct cdll *ltmp;
 
@@ -30,7 +33,13 @@ static bool check_pointers (struct cdll *l)
         return l->prev->next == l && l->next->prev == l;
 }
 
-static void cdll_todot (struct cdll *l, FILE *fp)
+/*
+ * Write cdll *l* to file *fp* as a DOT file.
+ *
+ * Note: Multiple items with the same value are handled, but not
+ * displayed correctly.
+ */
+static void cdll_todot(struct cdll *l, FILE *fp)
 {
         struct cdll *ltmp;
         if (CDLL_ISEMPTY(l)) {
@@ -53,7 +62,13 @@ static void cdll_todot (struct cdll *l, FILE *fp)
         fprintf(fp, "}\n");
 }
 
-static void cdll_print (struct cdll *l)
+/*
+ * Display cdll *l* as a string of values, e.g. for a cdll consisting of
+ * items 1, 2 and 3 (in that order):
+ *
+ *         -- 1 -- 2 -- 3 --
+ */
+static void cdll_print(struct cdll *l)
 {
         struct cdll *ltmp;
         if (CDLL_ISEMPTY(l)) {
@@ -67,7 +82,11 @@ static void cdll_print (struct cdll *l)
         printf("-- %d --\n", ltmp->item);
 }
 
-static void update_loop (struct cdll *l, char *fname)
+/*
+ * Provide a simple prompt to update a single cdll *l*, inserting or
+ * deleting items one by one.
+ */
+static void update_loop(struct cdll *l, char *fname)
 {
         FILE *fp;
         char cmd = 'n';
@@ -93,12 +112,23 @@ static void update_loop (struct cdll *l, char *fname)
         }
 }
 
-int main (int argc, char **argv)
+void print_and_pause(struct cdll *l, char *fname) {
+        FILE *fp = fopen(fname, "w");
+        cdll_todot(l, fp);
+        fclose(fp);
+        cdll_print(l);
+        if (!check_pointers(l)) {
+                printf("check_pointers() failed. Exiting.\n");
+                exit(1);
+        }
+        getchar();
+}
+
+int main(int argc, char **argv)
 {
         struct cdll *l = cdll_init();
         struct cdll *l2 = cdll_init();
         char *fname;
-        FILE *fp;
 
         if (argc > 2) {
                 if (strcmp(argv[1], "-i") != 0) {
@@ -110,49 +140,50 @@ int main (int argc, char **argv)
                 return 0;
         } else if (argc > 1) {
                 fname = argv[1];
+                printf("Testing procedure started. " \
+                                "Output will be written to %s.\n" \
+                                "Press any key to continue.\n",
+                                fname);
+
+                printf("empty cdll initialised.\n");
+                print_and_pause(l, fname);
+
+                cdll_insert(l, 1);
+                printf("inserted 1.\n");
+                print_and_pause(l, fname);
+
+                cdll_delete(l, 1);
+                printf("deleted 1.\n");
+                print_and_pause(l, fname);
 
                 cdll_insert(l, 1);
                 cdll_insert(l, 2);
                 cdll_insert(l, 3);
                 cdll_insert(l, 4);
                 cdll_insert(l, 5);
+                printf("inserted 1, 2, 3, 4, 5.\n");
+                print_and_pause(l, fname);
+
+                cdll_delete(l, 3);
+                printf("deleted 3.\n");
+                print_and_pause(l, fname);
 
                 cdll_insert(l2, 6);
                 cdll_insert(l2, 7);
                 cdll_insert(l2, 8);
                 cdll_insert(l2, 9);
                 cdll_insert(l2, 10);
-
-                fp = fopen(fname, "w");
-                cdll_todot(l, fp);
-                fclose(fp);
-                printf("cdll 1 written to %s. " \
-                                "Press any key to continue.\n",
-                                fname);
-                cdll_print(l);
-                getchar();
-
-                fp = fopen(fname, "w");
-                cdll_todot(l2, fp);
-                fclose(fp);
-                printf("cdll 2 written to %s. " \
-                                "Press any key to continue.\n",
-                                fname);
-                cdll_print(l2);
-                getchar();
+                printf("inserted 6, 7, 8, 9, 10 to other cdll.\n");
+                print_and_pause(l2, fname);
 
                 cdll_merge(l, l2);
-                assert(CDLL_ISEMPTY(l2));
+                printf("merged other cdll into original one.\n");
+                printf("original cdll after merge:\n");
+                print_and_pause(l, fname);
+                printf("other cdll after merge:\n");
+                print_and_pause(l2, fname);
+
                 cdll_free(l2);
-
-                fp = fopen(fname, "w");
-                cdll_todot(l, fp);
-                printf("merge of cdll 1 and cdll 2 written to %s.\n",
-                                fname);
-                cdll_print(l);
-                fclose(fp);
-
-                assert(check_pointers(l));
                 cdll_free_all(l);
                 return 0;
         } else {
