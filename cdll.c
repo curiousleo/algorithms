@@ -62,7 +62,8 @@ cdll *cdll_delete(cdll *l, int i) {
 void cdll_merge(cdll *l, cdll **l2ptr) {
   cdll *l2 = *l2ptr;
   if (CDLL_ISEMPTY(l)) {
-    l = l2;
+    /* copy contents (pointers and all) of *l2* to *l* */
+    *l = *l2;
   } else if (CDLL_ISEMPTY(l2)) {
     return;
   } else {
@@ -79,7 +80,6 @@ void cdll_merge(cdll *l, cdll **l2ptr) {
    * the cdll *l2* that is merged into the "our" cdll *l1* has to be
    * empty, so we need to copy its item, make all pointers to point to
    * the copy instead of the original, and set *l2* to be empty */
-  // TODO: What if l == l2?
   cdll_insert(l, l2->item);
   cdll_free(l2);
   *l2ptr = NULL;
